@@ -289,6 +289,23 @@ html, body {
   text-align: left;
 }
 
+#digisky-logo {
+  position: absolute;
+  bottom: 60px;
+  left: 10px;
+  z-index: 9999; /* above the map */
+}
+
+#digisky-logo img {
+  height: 40px; /* adjust size */
+  width: auto;
+  opacity: 0.9;
+}
+
+#digisky-logo img:hover {
+  opacity: 1;
+}
+
 /* Responsive fallback (for later) */
 @media (max-width: 768px) {
   #mainContainer {
