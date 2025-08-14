@@ -1,9 +1,11 @@
 const map = L.map('map').setView([46.8, 8.33], 8);
 
-
-
 const drawnItems = new L.FeatureGroup();
 map.addLayer(drawnItems);
+
+// adding a new leaflet with all the calculated buffers inside
+const bufferGroup = new L.FeatureGroup();
+map.addLayer(bufferGroup);
 
 const drawControl = new L.Control.Draw({
   position: 'topright',
@@ -142,3 +144,7 @@ function flyToAndMark(lat, lon, label) {
 // Make helper globally available to ui.js
 window.flyToAndMark = flyToAndMark;
 window.getFG = () => drawnItems.toGeoJSON(); // returns a FeatureCollection
+
+// Expose helpers so UI code can clear and add into this group
+window.clearCalculatedBuffers = () => bufferGroup.clearLayers();
+window._bufferGroup = bufferGroup;

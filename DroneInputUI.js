@@ -63,6 +63,10 @@ export function renderDroneInputUI(containerId = 'inputContent') {
       return;
     }
 
+    // Clear previous results UI and buffer layers before new calculation
+    el.querySelectorAll('.resultsPanel').forEach(n => n.remove());
+    window.clearCalculatedBuffers?.();
+
     try {
       const res = await fetch('https://digitool-backend.onrender.com/api/grb/run', {
         method: 'POST',
@@ -90,11 +94,13 @@ export function renderDroneInputUI(containerId = 'inputContent') {
       const aa_m  = Number.isFinite(meta.aa_m)  ? meta.aa_m  : null;
       const ah_m = Number.isFinite(meta.ah_m) ? meta.ah_m : null;
 
-      if (layers.ca)                L.geoJSON(layers.ca, { style: f => f.properties.style }).addTo(map);
-      if (layers.grb)               L.geoJSON(layers.grb, { style: f => f.properties.style }).addTo(map);
-      if (layers.detection_area)    L.geoJSON(layers.detection_area, { style: f => f.properties.style }).addTo(map);
-      if (layers.adjacent_area)     L.geoJSON(layers.adjacent_area, { style: f => f.properties.style }).addTo(map);
-      if (layers.assemblies_horizon) L.geoJSON(layers.assemblies_horizon, { style: f => f.properties.style }).addTo(map);
+      const targetGroup = window._bufferGroup || map;
+      
+      if (layers.ca)                 L.geoJSON(layers.ca, {                 style: f => f.properties.style }).addTo(targetGroup);
+      if (layers.grb)                L.geoJSON(layers.grb, {                style: f => f.properties.style }).addTo(targetGroup);
+      if (layers.detection_area)     L.geoJSON(layers.detection_area, {     style: f => f.properties.style }).addTo(targetGroup);
+      if (layers.adjacent_area)      L.geoJSON(layers.adjacent_area, {      style: f => f.properties.style }).addTo(targetGroup);
+      if (layers.assemblies_horizon) L.geoJSON(layers.assemblies_horizon, { style: f => f.properties.style }).addTo(targetGroup);
 
 
       const panelHtml = `
