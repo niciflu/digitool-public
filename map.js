@@ -113,7 +113,7 @@ const overlays = {
   "ICAO Karte": icaoKarte,
   "Luftfahrthindernisse": luftfahrthindernisse,
   "Einschränkungen für Drohnen": drohnenEinschraenkungen,
-  "SORA Bodenrisiko": soraBodenrisiko
+  "SORA Bodenrisiko": soraBodenrisiko,
   "Spitallandeplätze": spitallandeplaetze,
   "Gebirgslandeplätze": gebirgslandeplaetze
 };
