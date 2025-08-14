@@ -1,5 +1,3 @@
-console.log("map script loaded");
-
 const map = L.map('map').setView([46.8, 8.33], 8);
 
 
@@ -29,6 +27,16 @@ map.on('draw:created', function (e) {
   const geojson = layer.toGeoJSON();
   console.log("Drawn polygon GeoJSON:", JSON.stringify(geojson));
 });
+
+if (L.control && typeof L.control.measure === 'function') {
+  L.control.measure({ position: 'topright',
+    primaryLengthUnit: 'meters',
+    secondaryLengthUnit: 'kilometers',
+    primaryAreaUnit: 'sqmeters'}).addTo(map);
+} 
+else {
+  console.error('leaflet-measure not found – is the script loaded before map.js?');
+}
 
 map.createPane('overlayPaneTop');
 map.getPane('overlayPaneTop').style.zIndex = 650;
@@ -79,6 +87,18 @@ const icaoKarte = L.tileLayer.wms('https://wms.geo.admin.ch/', {
   opacity: 1.0
 });
 
+// --- Spitallandeplätze (hospital landing sites) — WMTS (EPSG:3857)
+const spitallandeplaetze = L.tileLayer(
+  "https://wmts.geo.admin.ch/1.0.0/ch.bazl.spitallandeplaetze/default/current/3857/{z}/{x}/{y}.png",
+  { pane: 'overlayPaneTop', attribution: '© geo.admin.ch / BAZL' }
+);
+
+// --- Gebirgslandeplätze (mountain landing sites) — WMTS (EPSG:3857)
+const gebirgslandeplaetze = L.tileLayer(
+  "https://wmts.geo.admin.ch/1.0.0/ch.bazl.gebirgslandeplaetze/default/current/3857/{z}/{x}/{y}.png",
+  { pane: 'overlayPaneTop', attribution: '© geo.admin.ch / BAZL' }
+);
+
 pixelkarteFarbe.addTo(map);
 drohnenEinschraenkungen.addTo(map);
 soraBodenrisiko.addTo(map);
@@ -94,6 +114,8 @@ const overlays = {
   "Luftfahrthindernisse": luftfahrthindernisse,
   "Einschränkungen für Drohnen": drohnenEinschraenkungen,
   "SORA Bodenrisiko": soraBodenrisiko
+  "Spitallandeplätze": spitallandeplaetze,
+  "Gebirgslandeplätze": gebirgslandeplaetze
 };
 
 // Only include base layers — no overlays

@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.css">
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -75,6 +76,23 @@
             </div>
             <input type="range" id="soraOpacity" min="0" max="1" step="0.01" value="0.4" title="SORA Risk Opacity">
           </div>
+
+          <!-- Spitallandeplätze -->
+          <div class="toolBox overlayControl">
+            <div class="overlayRow">
+              <input type="checkbox" id="spitalToggle">
+              <label for="spitalToggle">Spitallandeplätze</label>
+            </div>
+          </div>
+
+          <!-- Gebirgslandeplätze -->
+          <div class="toolBox overlayControl">
+            <div class="overlayRow">
+              <input type="checkbox" id="gebirgsToggle">
+              <label for="gebirgsToggle">Gebirgslandeplätze</label>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -91,6 +109,7 @@
   <!-- JS includes -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.js"></script>
   <script src="map.js"></script>
   <script src="ui.js"></script>
   <script type="module">

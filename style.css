@@ -327,3 +327,54 @@ html, body {
     max-height: 40vh;
   }
 }
+
+/* ===== LEAFLET MEASURE CONTROL STYLING ===== */
+
+/* Position: place it just under the Draw control */
+.leaflet-top.leaflet-right .leaflet-control-measure {
+  margin-top: 50px; /* Adjust so it sits below Draw control */
+  margin-right: 10px;
+}
+
+/* Expanded panel styling */
+.leaflet-control-measure .leaflet-control-measure-interaction {
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  padding: 10px;
+}
+
+/* Results inside measure control */
+.leaflet-control-measure .results {
+  background: #ffffff;
+  color: #0b1b3a;  /* same as .resultsPanel text */
+  border-radius: 8px;
+  border: 1px solid #eef1f6;
+  padding: 8px;
+  margin-top: 6px;
+}
+
+/* Form elements inside */
+.leaflet-control-measure input,
+.leaflet-control-measure button,
+.leaflet-control-measure select {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+}
+.leaflet-control-measure button {
+  background-color: #004080;
+  color: #fff;
+  border: 0;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.leaflet-control-measure button:hover {
+  background-color: #0059b3;
+}
+
+/* Z-index so it appears above overlays */
+.leaflet-control-measure {
+  z-index: 1001;
+}

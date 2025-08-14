@@ -20,6 +20,12 @@ document.getElementById('soraToggle').onchange = (e) =>
 document.getElementById('soraOpacity').oninput = (e) =>
   soraBodenrisiko.setOpacity(parseFloat(e.target.value));
 
+document.getElementById('spitalToggle').onchange = (e) =>
+  e.target.checked ? spitallandeplaetze.addTo(map) : map.removeLayer(spitallandeplaetze);
+
+document.getElementById('gebirgsToggle').onchange = (e) =>
+  e.target.checked ? gebirgslandeplaetze.addTo(map) : map.removeLayer(gebirgslandeplaetze);
+
 const toolsToggle = document.getElementById('toolsToggle');
 const mapTools = document.getElementById('mapTools');
 
