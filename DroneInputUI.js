@@ -64,7 +64,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
     }
 
     try {
-      const res = await fetch('http://localhost:8000/api/grb/run', {
+      const res = await fetch('https://digitool-backend.onrender.com/api/grb/run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fg, params: input })
