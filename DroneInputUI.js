@@ -89,7 +89,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
 
       const scv_m = Number.isFinite(meta.scv_m) ? meta.scv_m : null;
       const hcv_m = Number.isFinite(meta.hcv_m) ? meta.hcv_m : null;
-      const grb_m = Number.isFinite(meta.grb_m) ? meta.grb_m : null;
+      const grb_m = Number.isFinite(meta.grb_m) ? (meta.grb_m - meta.scv_m) : null;
       const sd_m  = Number.isFinite(meta.sd_m)  ? meta.sd_m  : null;
       const aa_m  = Number.isFinite(meta.aa_m)  ? meta.aa_m  : null;
       const ah_m = Number.isFinite(meta.ah_m) ? meta.ah_m : null;
