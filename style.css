@@ -70,6 +70,12 @@ html, body {
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 }
 
+.digisky-logo {
+  margin: 0 0 10px 10px;   /* position padding from the corner */
+  z-index: 1001;           /* > map (1) and > tools (1000) */
+}
+
+
 /* Results panel */
 .resultsPanel {
   width: 100%;
