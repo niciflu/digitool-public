@@ -298,12 +298,12 @@ html, body {
 #digisky-logo {
   position: absolute;
   bottom: 60px;
-  left: 10px;
+  right: 10px;
   z-index: 9999; /* above the map */
 }
 
 #digisky-logo img {
-  height: 40px; /* adjust size */
+  height: 80px; /* adjust size */
   width: auto;
   opacity: 0.9;
 }
