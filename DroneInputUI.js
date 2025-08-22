@@ -1,4 +1,5 @@
 import { collectInputs } from './DroneInput.js';
+import { wireKmlUI } from './modules/kml/kml.js';
 
 export function renderDroneInputUI(containerId = 'inputContent') {
   const el = document.getElementById(containerId);
@@ -48,6 +49,12 @@ export function renderDroneInputUI(containerId = 'inputContent') {
     </label><br>
 
     <button id="submitDroneInputs">Puffer berechnen</button>
+    
+    <!-- KML controls -->
+    <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+      <button id="kmlImportBtn">KML importieren</button>
+      <button id="kmlExportBtn">KML exportieren</button>
+    </div>
   `;
 
   // simple style helper (you were calling style(...) but hadn't defined it)
@@ -147,5 +154,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
       alert(`Request failed: ${e.message}`);
     }
   });
+
+  wireKmlUI({ exportScopeSelectId: 'kmlScope' }); // will look for #kmlImportBtn and #kmlExportBtn we added above
 
 }

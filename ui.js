@@ -97,3 +97,16 @@ document.addEventListener('click', (e) => {
   if (!document.getElementById('searchBox')?.contains(e.target)) clearResults();
 });
 
+// ui.js
+
+// Add to your export dialog:
+//  - radio name="kmlInclude": values "all" (default), "fg", "buffers"
+//  - checkbox id="kmlPreserveStyles" (checked)
+//  - checkbox id="kmlFlatten" (optional)
+
+export function getKmlExportOptionsFromUI() {
+  const include = (document.querySelector('input[name="kmlInclude"]:checked')?.value) || 'all';
+  const preserveStyles = !!document.getElementById('kmlPreserveStyles')?.checked;
+  const flatten = !!document.getElementById('kmlFlatten')?.checked;
+  return { include, preserveStyles, flatten };
+}

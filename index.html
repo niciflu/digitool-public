@@ -110,12 +110,14 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/leaflet-measure@3.1.0/dist/leaflet-measure.js"></script>
-  <script src="map.js"></script>
-  <script src="ui.js"></script>
-  <script type="module">
-    import { renderDroneInputUI } from './DroneInputUI.js';
-    renderDroneInputUI();
-  </script>
+  <<script src="./libs/togeojson.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tokml@0.4.0/tokml.js"></script>
+  <script type="module" src="map.js"></script>
+  <script type="module" src="ui.js"></script>
+  <script type="module">import { renderDroneInputUI } from './DroneInputUI.js';renderDroneInputUI();</script>
+
+  <!-- Your modular KML JS -->
+  <script type="module" src="./modules/kml/kml.js"></script>
 
   <!-- JavaScript to load the version -->
   <script src="./version.js"></script>
