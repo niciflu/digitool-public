@@ -160,6 +160,12 @@ window.getFG = () => drawnItems.toGeoJSON(); // returns a FeatureCollection
 window.clearCalculatedBuffers = () => bufferGroup.clearLayers();
 window._bufferGroup = bufferGroup;
 
+window.map = map;
+window.overlays = overlays; // expose for UI toggles
+
+// signal that map + overlays are ready
+window.dispatchEvent(new Event('digitool:mapReady'));
+
 // Allow KML import to add features to the drawn items group
 window.addGeoJSONToDrawn = (geojson) => {
   if (!geojson) return;

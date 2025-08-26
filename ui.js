@@ -1,30 +1,32 @@
-console.log("ui script loaded");
+function bindOverlayControl(toggleId, sliderId, key) {
+  const layer = window.overlays[key];
+  const toggle = document.getElementById(toggleId);
+  const slider = document.getElementById(sliderId);
 
-document.getElementById('icaoToggle').onchange = (e) =>
-  e.target.checked ? icaoKarte.addTo(map) : map.removeLayer(icaoKarte);
-document.getElementById('icaoOpacity').oninput = (e) =>
-  icaoKarte.setOpacity(parseFloat(e.target.value));
+  if (toggle) {
+    toggle.onchange = (e) =>
+      e.target.checked ? layer.addTo(window.map) : window.map.removeLayer(layer);
+  }
+  if (slider && layer.setOpacity) {
+    slider.oninput = (e) => layer.setOpacity(parseFloat(e.target.value));
+  }
+}
 
-document.getElementById('obstacleToggle').onchange = (e) =>
-  e.target.checked ? luftfahrthindernisse.addTo(map) : map.removeLayer(luftfahrthindernisse);
-document.getElementById('obstacleOpacity').oninput = (e) =>
-  luftfahrthindernisse.setOpacity(parseFloat(e.target.value));
+function setupOverlayBindings() {
+  bindOverlayControl('icaoToggle',    'icaoOpacity',    'ICAO Karte');
+  bindOverlayControl('obstacleToggle','obstacleOpacity','Luftfahrthindernisse');
+  bindOverlayControl('droneToggle',   'droneOpacity',   'Einschränkungen für Drohnen');
+  bindOverlayControl('soraToggle',    'soraOpacity',    'SORA Bodenrisiko');
+  bindOverlayControl('spitalToggle',  null,             'Spitallandeplätze');
+  bindOverlayControl('gebirgsToggle', null,             'Gebirgslandeplätze');
+}
 
-document.getElementById('droneToggle').onchange = (e) =>
-  e.target.checked ? drohnenEinschraenkungen.addTo(map) : map.removeLayer(drohnenEinschraenkungen);
-document.getElementById('droneOpacity').oninput = (e) =>
-  drohnenEinschraenkungen.setOpacity(parseFloat(e.target.value));
-
-document.getElementById('soraToggle').onchange = (e) =>
-  e.target.checked ? soraBodenrisiko.addTo(map) : map.removeLayer(soraBodenrisiko);
-document.getElementById('soraOpacity').oninput = (e) =>
-  soraBodenrisiko.setOpacity(parseFloat(e.target.value));
-
-document.getElementById('spitalToggle').onchange = (e) =>
-  e.target.checked ? spitallandeplaetze.addTo(map) : map.removeLayer(spitallandeplaetze);
-
-document.getElementById('gebirgsToggle').onchange = (e) =>
-  e.target.checked ? gebirgslandeplaetze.addTo(map) : map.removeLayer(gebirgslandeplaetze);
+// If overlays are already published, bind immediately; otherwise wait for the event from map.js
+if (window.overlays && window.map) {
+  setupOverlayBindings();
+} else {
+  window.addEventListener('digitool:mapReady', setupOverlayBindings, { once: true });
+}
 
 const toolsToggle = document.getElementById('toolsToggle');
 const mapTools = document.getElementById('mapTools');
