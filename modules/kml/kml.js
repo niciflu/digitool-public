@@ -31,7 +31,17 @@ function applySimpleStyleToFeature(f) {
   if (hasFillOpacity) p['fill-opacity'] = s.fillOpacity;
 }
 
-
+// helper to append params and results to kml.
+function attachDigitoolMetaToFeatures(features) {
+  const params  = window.DigitoolState?.lastInputs || null;
+  const results = window.DigitoolState?.lastResults || null;
+  if (!params && !results) return;
+  for (const f of features) {
+    const p = (f.properties = f.properties || {});
+    if (params)  p['digitool:params']  = JSON.stringify(params);
+    if (results) p['digitool:results'] = JSON.stringify(results);
+  }
+}
 
 // Export helpers
 function exportDrawnAsKml(filename = 'flight_geography.kml') {
@@ -44,16 +54,11 @@ function exportDrawnAsKml(filename = 'flight_geography.kml') {
     alert('tokml library nicht geladen.');
     return;
   }
-  // Deep clone and flatten styles to simplestyle
+   // Deep clone and flatten styles to simplestyle
   const styled = JSON.parse(JSON.stringify(gj));
+  attachDigitoolMetaToFeatures(styled.features);    // <<< INSERT HERE (line ~40)
   styled.features.forEach(applySimpleStyleToFeature);
-
-  // Some builds of tokml pick up simplestyle automatically; the option doesn't hurt
-  const kml = window.tokml(styled, {
-    name: 'name',
-    simplestyle: true
-  });
-
+  const kml = window.tokml(styled, { name: 'name', simplestyle: true });
   download(filename, kml);
 }
 
@@ -77,13 +82,9 @@ function exportBuffersAsKml(filename = 'calculated_buffers.kml') {
   };
 
   const styled = JSON.parse(JSON.stringify(merged));
+  attachDigitoolMetaToFeatures(styled.features);    // <<< INSERT HERE (line ~75)
   styled.features.forEach(applySimpleStyleToFeature);
-
-  const kml = window.tokml(styled, {
-    name: 'name',
-    simplestyle: true
-  });
-
+  const kml = window.tokml(styled, { name: 'name', simplestyle: true });
   download(filename, kml);
 }
 
@@ -252,6 +253,7 @@ export function setDigitoolMeta(placemarkEl, meta = {}) {
   if (meta.layerType) setData('digitool:layerType', meta.layerType);
   if (meta.grbVersion) setData('digitool:grbVersion', meta.grbVersion);
   if (meta.params) setData('digitool:params', JSON.stringify(meta.params));
+  if (meta.results) setData('digitool:results', JSON.stringify(meta.results));
 }
 
 export function getDigitoolMeta(placemarkEl) {
@@ -269,6 +271,13 @@ export function getDigitoolMeta(placemarkEl) {
   if (paramsRaw) {
     try { meta.params = JSON.parse(paramsRaw); } catch { meta.params = paramsRaw; }
   }
+
+   const resultsRaw = q('digitool:results');
+  if (resultsRaw) {
+    try { meta.params = meta.params; } catch {}
+    try { meta.results = JSON.parse(resultsRaw); } catch { meta.results = resultsRaw; }
+  }
+
   return meta;
 }
 

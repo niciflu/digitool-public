@@ -90,6 +90,28 @@ export function renderDroneInputUI(containerId = 'inputContent') {
       console.debug('[GRB] response:', data);
 
       const meta = data?.meta ?? {};
+      // Store last inputs & results globally for KML export
+      window.DigitoolState = window.DigitoolState || {};
+      window.DigitoolState.lastInputs = {
+        hfg:        meta?.inputs?.hfg,
+        opType:     meta?.inputs?.opType,
+        aircraftType: meta?.inputs?.aircraftType,
+        prsEquipped:  meta?.inputs?.prsEquipped,
+        cd:         meta?.inputs?.cd,
+        v0:         meta?.inputs?.v0,
+        roc:        meta?.inputs?.roc,
+        rod:        meta?.inputs?.rod,
+        wind:       meta?.inputs?.wind
+      };
+      window.DigitoolState.lastResults = {
+        scv:  meta?.scv_m,
+        hcv:  meta?.hcv_m,
+        grb:  meta?.grb_m,
+        ah:   meta?.ah_m,
+        decon: meta?.sd_m,   // only set if BVLOS; may be null
+        aa:   meta?.aa_m
+      };
+
       const layers = data?.layers ?? {};
 
       const fmt = (x, digits = 1) => Number.isFinite(x) ? x.toFixed(digits) : '—';
@@ -158,3 +180,53 @@ export function renderDroneInputUI(containerId = 'inputContent') {
   wireKmlUI({ exportScopeSelectId: 'kmlScope' }); // will look for #kmlImportBtn and #kmlExportBtn we added above
 
 }
+
+
+// === KML → UI helpers ===
+function prefillInputsFromKml(params = {}) {
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el != null && v != null) el.value = String(v); };
+  const setCheck = (id, v) => { const el = document.getElementById(id); if (el) el.checked = !!v; };
+
+  setVal('hfgInput', params.hfg);
+  setVal('cdInput',  params.cd);
+  setVal('v0Input',  params.v0);
+  setVal('rocInput', params.roc);
+  setVal('rodInput', params.rod);
+  setVal('windInput', params.wind);
+
+  const opSel = document.getElementById('opType'); if (opSel && params.opType) opSel.value = params.opType;
+  const acSel = document.getElementById('aircraftType'); if (acSel && params.aircraftType) acSel.value = params.aircraftType;
+  setCheck('prsEquipped', params.prsEquipped);
+}
+
+function renderResultsPanelFromKml(results = {}) {
+  const el = document.getElementById('inputContent');
+  if (!el) return;
+  el.querySelectorAll('.resultsPanel').forEach(n => n.remove());
+
+  const fmt = (x, d=1) => (Number.isFinite(x) ? Number(x).toFixed(d) : '—');
+
+  const panelHtml = `
+    <div class="resultsPanel">
+      <h4>Berechnete Puffer (aus KML)</h4>
+      <div class="metricRow"><div class="metricLabel"><span class="chip chip-scv"></span>Scv</div><div class="metricValue">${fmt(results.scv)} m</div></div>
+      ${Number.isFinite(results.hcv) ? `<div class="metricRow"><div class="metricLabel"><span class="chip chip-scv"></span>Hcv</div><div class="metricValue">${fmt(results.hcv)} m</div></div>` : ''}
+      <div class="metricRow"><div class="metricLabel"><span class="chip chip-grb"></span>GRB</div><div class="metricValue">${fmt(results.grb)} m</div></div>
+      <div class="metricRow"><div class="metricLabel"><span class="chip chip-ah"></span>Versammlungen</div><div class="metricValue">${fmt(results.ah)} m</div></div>
+      <div class="metricRow"><div class="metricLabel"><span class="chip chip-sd"></span>Detektion</div><div class="metricValue">${fmt(results.decon)} m</div></div>
+      <div class="metricRow"><div class="metricLabel"><span class="chip chip-aa"></span>Angrenzend</div><div class="metricValue">${fmt(results.aa, 0)} m</div></div>
+    </div>`;
+  el.insertAdjacentHTML('beforeend', panelHtml);
+}
+
+// Global hook for the importer:
+window.onKmlImportedMeta = (params, results) => {
+  try {
+    prefillInputsFromKml(params || {});
+    renderResultsPanelFromKml(results || {});
+    // keep state for future exports
+    window.DigitoolState = window.DigitoolState || {};
+    window.DigitoolState.lastInputs  = params  || null;
+    window.DigitoolState.lastResults = results || null;
+  } catch (e) { console.error('Failed to apply imported meta', e); }
+};

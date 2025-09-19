@@ -167,10 +167,11 @@ window.overlays = overlays; // expose for UI toggles
 window.dispatchEvent(new Event('digitool:mapReady'));
 
 // Allow KML import to add features to the drawn items group
+// KML/GeoJSON → Map: put FG into Drawn, others into Buffers (non-editable)
+/ KML/GeoJSON → Map: put FG into Drawn, others into Buffers (non-editable)
 window.addGeoJSONToDrawn = (geojson) => {
   if (!geojson) return;
 
-  // Map SimpleStyle -> Leaflet Path options
   const toLeafletStyle = (p = {}) => ({
     color:       p.stroke || '#00A36C',
     weight:      p['stroke-width'] ?? 2,
@@ -179,28 +180,51 @@ window.addGeoJSONToDrawn = (geojson) => {
     fillOpacity: p['fill-opacity'] ?? (p.fill ? 0.4 : 0)
   });
 
-L.geoJSON(geojson, {
-    style: f => toLeafletStyle(f.properties || {}),
-    pointToLayer: (f, latlng) => {
-      const p = f.properties || {};
-      if (p.icon) {
-        // If KML had an IconStyle, togeojson exposes it as properties.icon
-        return L.marker(latlng, { icon: L.icon({ iconUrl: p.icon, iconSize: [24, 24] }) });
+  const isFG = (props = {}) => {
+    const t = (props['digitool:layerType'] || props.layerType || '').toString().toUpperCase();
+    const n = (props.name || '').toLowerCase();
+    return t === 'FG' || /\bfg\b|flight\s*geograph/.test(n);
+  };
+
+  let metaApplied = false;
+  const onEach = (f, layer) => {
+    const s = toLeafletStyle(f.properties || {});
+    layer.feature = layer.feature || { type: 'Feature', properties: {}, geometry: f.geometry };
+    layer.feature.properties.style = {
+      color: s.color, weight: s.weight, opacity: s.opacity,
+      fillColor: s.fillColor, fillOpacity: s.fillOpacity
+    };
+    if (f.properties?.name) layer.feature.properties.name = f.properties.name;
+
+    // Pull params/results once to prefill UI
+    if (!metaApplied) {
+      const ptxt = f.properties?.['digitool:params'];
+      const rtxt = f.properties?.['digitool:results'];
+      if (ptxt || rtxt) {
+        let params = null, results = null;
+        try { if (ptxt) params = JSON.parse(ptxt); }  catch { params = ptxt; }
+        try { if (rtxt) results = JSON.parse(rtxt); } catch { results = rtxt; }
+        window.onKmlImportedMeta && window.onKmlImportedMeta(params, results);
+        metaApplied = true;
       }
-      return L.marker(latlng);
-    },
-    onEachFeature: (f, layer) => {
-      // Persist a standard 'style' block so exports stay styled too
-      const s = toLeafletStyle(f.properties || {});
-      layer.feature = layer.feature || { type: 'Feature', properties: {}, geometry: f.geometry };
-      layer.feature.properties.style = {
-        color: s.color, weight: s.weight, opacity: s.opacity,
-        fillColor: s.fillColor, fillOpacity: s.fillOpacity
-      };
-      // Keep the name if present (so re-exports keep placemark names)
-      if (f.properties?.name) layer.feature.properties.name = f.properties.name;
     }
+  };
+
+  // FG → Drawn
+  L.geoJSON(geojson, {
+    filter: f => isFG(f.properties || {}),
+    style:  f => toLeafletStyle(f.properties || {}),
+    pointToLayer: (f, latlng) => L.marker(latlng), // editable set by Drawn group
+    onEachFeature: onEach
   }).eachLayer(layer => drawnItems.addLayer(layer));
+
+  // Buffers → Buffers (non-interactive)
+  L.geoJSON(geojson, {
+    filter: f => !isFG(f.properties || {}),
+    style:  f => ({ ...toLeafletStyle(f.properties || {}), interactive: false }),
+    pointToLayer: (f, latlng) => L.marker(latlng, { interactive: false }),
+    onEachFeature: onEach
+  }).eachLayer(layer => bufferGroup.addLayer(layer));
 };
 
 // Returns a FeatureCollection of all calculated buffer layers
@@ -214,12 +238,59 @@ window.getCalculatedBuffers = () => bufferGroup.toGeoJSON();
 import { exportKML, importKML } from './modules/kml/kml.js';
 import { getKmlExportOptionsFromUI } from './ui.js';
 
-// Collect current features from your map state
+// Collect current features from the map and attach meta for KML export
 function collectFeaturesForExport() {
-  // Normalize your current layers to { geometry, name, styleUrl, meta: { layerType, grbVersion, params } }
-  // Ensure FG has meta.layerType = 'FG', buffers = 'AssembliesHorizon' | 'AdjacentArea'
-  // Return an array
-  return window.DigitoolState.features;
+  const fgFC  = window.getFG?.();                 // FeatureCollection
+  const bufFC = window.getCalculatedBuffers?.();  // FeatureCollection
+  const inputs  = (window.DigitoolState && window.DigitoolState.lastInputs)  || null;
+  const results = (window.DigitoolState && window.DigitoolState.lastResults) || null;
+
+  const features = [];
+
+  // 1) Flight Geography → layerType 'FG'
+  if (fgFC?.features?.length) {
+    for (const f of fgFC.features) {
+      features.push({
+        name: f?.properties?.name || 'Flight Geography',
+        geometry: f.geometry,
+        styleUrl: null, // let kml.js pick default if needed
+        meta: {
+          layerType: 'FG',
+          grbVersion: '3.3.0',     // optional; keep if you want a version tag
+          params: inputs,          // <- your user inputs
+          results: results         // <- your computed buffer sizes
+        }
+      });
+    }
+  }
+
+  // 2) Buffers → classify by feature name (you already set names in backend)
+  const classifyBuffer = (name = '') => {
+    const n = name.toLowerCase();
+    if (n.includes('assemblies')) return 'AssembliesHorizon';
+    if (n.includes('adjacent'))   return 'AdjacentArea';
+    // Keep others (containment/grb/detection) under 'AdjacentArea' folder or skip styling
+    return 'AdjacentArea';
+  };
+
+  if (bufFC?.features?.length) {
+    for (const f of bufFC.features) {
+      const name = f?.properties?.name || 'Buffer';
+      features.push({
+        name,
+        geometry: f.geometry,
+        styleUrl: null,
+        meta: {
+          layerType: classifyBuffer(name),
+          grbVersion: '3.3.0',
+          params: inputs,     // <- user inputs copied onto each placemark
+          results: results    // <- computed sizes copied onto each placemark
+        }
+      });
+    }
+  }
+
+  return features;
 }
 
 export function onClickExportKML() {
