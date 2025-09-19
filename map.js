@@ -168,7 +168,6 @@ window.dispatchEvent(new Event('digitool:mapReady'));
 
 // Allow KML import to add features to the drawn items group
 // KML/GeoJSON → Map: put FG into Drawn, others into Buffers (non-editable)
-/ KML/GeoJSON → Map: put FG into Drawn, others into Buffers (non-editable)
 window.addGeoJSONToDrawn = (geojson) => {
   if (!geojson) return;
 
