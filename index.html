@@ -122,8 +122,12 @@
   <!-- JavaScript to load the version -->
   <script src="./version.js"></script>
   <script>
-    const el = document.getElementById('version-box');
-    if (el) el.textContent = 'v' + (window.APP_VERSION ?? 'dev');
+  const el = document.getElementById('version-box');
+  if (el) {
+    const v = window.APP_VERSION ? `V.${window.APP_VERSION}` : 'dev';
+    const c = window.APP_COPYRIGHT ? ` • ${window.APP_COPYRIGHT}` : '';
+    el.textContent = `${v}${c}`;
+  }
   </script>
 
 </body>

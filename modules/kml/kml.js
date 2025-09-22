@@ -35,11 +35,16 @@ function applySimpleStyleToFeature(f) {
 function attachDigitoolMetaToFeatures(features) {
   const params  = window.DigitoolState?.lastInputs || null;
   const results = window.DigitoolState?.lastResults || null;
+  const app = 'Digitool';
+  const ver = window.APP_VERSION || 'dev';
   if (!params && !results) return;
   for (const f of features) {
     const p = (f.properties = f.properties || {});
     if (params)  p['digitool:params']  = JSON.stringify(params);
     if (results) p['digitool:results'] = JSON.stringify(results);
+
+    p['digitool:app']     = app;          // e.g., "Digitool"
+    p['digitool:version'] = `v${ver}`;    // e.g., "v0.7.0"
   }
 }
 
