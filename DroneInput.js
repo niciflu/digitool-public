@@ -7,15 +7,15 @@ export function collectInputs() {
   const v0 = parseFloat(document.getElementById('v0Input')?.value);
   const rod = parseFloat(document.getElementById('rodInput')?.value);
 
-  let roc = parseFloat(document.getElementById('rocInput')?.value);
-  let wind = parseFloat(document.getElementById('windInput')?.value);
+  const roc = parseFloat(document.getElementById('rocInput')?.value);
+  const wind = parseFloat(document.getElementById('windInput')?.value);
 
   roc = isNaN(roc) ? 0 : roc; // Default to 0 if not provided
   wind = isNaN(wind) ? 0 : wind; // Default to 0 if not provided
   
   if (rod <= 0) { alert("RoD must be > 0 m/s."); return null; }
 
-  if ([hfg, cd, v0, rod].some(isNaN)) {
+  if ([hfg, cd, v0, rod, roc, wind].some(isNaN)) {
     alert("Bitte füllen Sie alle erforderlichen Felder aus.");
     return null;
   }

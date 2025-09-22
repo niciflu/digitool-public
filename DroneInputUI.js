@@ -36,7 +36,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
       <input id="v0Input" type="number" step="0.1">
     </label><br>
 
-    <label>Steigrate (ROC) [m/s]:
+    <label>Steigrate (ROC) [m/s]*:
       <input id="rocInput" type="number" step="0.1">
     </label><br>
 
