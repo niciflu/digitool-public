@@ -108,7 +108,8 @@ export function renderDroneInputUI(containerId = 'inputContent') {
         hcv:  meta?.hcv_m,
         grb:  meta?.grb_m,
         ah:   meta?.ah_m,
-        decon: meta?.sd_m,   // only set if BVLOS; may be null
+        decon: meta?.sd_m,
+        hdeco:  meta?.hd_m,   // only set if BVLOS; may be null
         aa:   meta?.aa_m
       };
 
@@ -120,6 +121,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
       const hcv_m = Number.isFinite(meta.hcv_m) ? meta.hcv_m : null;
       const grb_m = Number.isFinite(meta.grb_m) ? (meta.grb_m - meta.scv_m) : null;
       const sd_m  = Number.isFinite(meta.sd_m)  ? meta.sd_m  : null;
+      const hd_m  = Number.isFinite(meta.hd_m)  ? meta.hd_m  : null; // only set if BVLOS; may be null
       const aa_m  = Number.isFinite(meta.aa_m)  ? meta.aa_m  : null;
       const ah_m = Number.isFinite(meta.ah_m) ? meta.ah_m : null;
 
@@ -128,6 +130,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
       if (layers.ca)                 L.geoJSON(layers.ca, {                 style: f => f.properties.style }).addTo(targetGroup);
       if (layers.grb)                L.geoJSON(layers.grb, {                style: f => f.properties.style }).addTo(targetGroup);
       if (layers.detection_area)     L.geoJSON(layers.detection_area, {     style: f => f.properties.style }).addTo(targetGroup);
+      if (layers.detection_height)   L.geoJSON(layers.detection_height, {   style: f => f.properties.style }).addTo(targetGroup);
       if (layers.adjacent_area)      L.geoJSON(layers.adjacent_area, {      style: f => f.properties.style }).addTo(targetGroup);
       if (layers.assemblies_horizon) L.geoJSON(layers.assemblies_horizon, { style: f => f.properties.style }).addTo(targetGroup);
 
@@ -161,6 +164,12 @@ export function renderDroneInputUI(containerId = 'inputContent') {
             <div class="metricLabel"><span class="chip chip-sd"></span>Detektion</div>
             <div class="metricValue">${fmt(sd_m)} m</div>
           </div>
+
+          ${hd_m !== null ? `
+          <div class="metricRow">
+            <div class="metricLabel"><span class="chip chip-hd"></span>Hdeco</div>
+            <div class="metricValue">${fmt(hd_m)} m</div>
+          </div>` : ''}
 
           <div class="metricRow">
             <div class="metricLabel"><span class="chip chip-aa"></span>Angrenzend</div>
@@ -214,6 +223,7 @@ function renderResultsPanelFromKml(results = {}) {
       <div class="metricRow"><div class="metricLabel"><span class="chip chip-grb"></span>GRB</div><div class="metricValue">${fmt(results.grb)} m</div></div>
       <div class="metricRow"><div class="metricLabel"><span class="chip chip-ah"></span>Versammlungen</div><div class="metricValue">${fmt(results.ah)} m</div></div>
       <div class="metricRow"><div class="metricLabel"><span class="chip chip-sd"></span>Detektion</div><div class="metricValue">${fmt(results.decon)} m</div></div>
+      ${Number.isFinite(results.hdeco) ? `<div class="metricRow"><div class="metricLabel"><span class="chip chip-hd"></span>Hdeco</div><div class="metricValue">${fmt(results.hdeco)} m</div></div>` : ''}
       <div class="metricRow"><div class="metricLabel"><span class="chip chip-aa"></span>Angrenzend</div><div class="metricValue">${fmt(results.aa, 0)} m</div></div>
     </div>`;
   el.insertAdjacentHTML('beforeend', panelHtml);

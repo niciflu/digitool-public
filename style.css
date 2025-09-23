@@ -119,6 +119,7 @@ html, body {
 .chip-scv { background:#DDB027; }
 .chip-grb { background:#DD3927; }
 .chip-sd  { background:#00009B; }
+.chip-hd  { background:#00009B; } /* Detection Height */
 .chip-aa  { background:#FF0000; }
 .chip-ah  { background:#0000FF; } /* Assemblies Horizon */
 
