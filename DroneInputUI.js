@@ -119,7 +119,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
 
       const scv_m = Number.isFinite(meta.scv_m) ? meta.scv_m : null;
       const hcv_m = Number.isFinite(meta.hcv_m) ? meta.hcv_m : null;
-      const grb_m = Number.isFinite(meta.grb_m) ? (meta.grb_m - meta.scv_m) : null;
+      const grb_m = Number.isFinite(meta.grb_m) ? meta.grb_m : null;
       const sd_m  = Number.isFinite(meta.sd_m)  ? meta.sd_m  : null;
       const hd_m  = Number.isFinite(meta.hd_m)  ? meta.hd_m  : null; // only set if BVLOS; may be null
       const aa_m  = Number.isFinite(meta.aa_m)  ? meta.aa_m  : null;
@@ -240,3 +240,4 @@ window.onKmlImportedMeta = (params, results) => {
     window.DigitoolState.lastResults = results || null;
   } catch (e) { console.error('Failed to apply imported meta', e); }
 };
+
