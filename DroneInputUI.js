@@ -151,7 +151,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
           <h4>Berechnete Puffer</h4>
 
           <div class="metricRow">
-            <div class="metricLabel"><span class="chip chip-scv" data-key="scv" title="Ein-/Ausblenden">Scv</div>
+            <div class="metricLabel"><span class="chip chip-scv" data-key="scv" title="Ein-/Ausblenden"></span>Scv</div>
             <div class="metricValue">${fmt(scv_m)} m</div>
           </div>
 
@@ -162,7 +162,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
           </div>` : ''}
 
           <div class="metricRow">
-            <div class="metricLabel"><span class="chip chip-grb" data-key="grb" title="Ein-/Ausblenden">GRB</div>
+            <div class="metricLabel"><span class="chip chip-grb" data-key="grb" title="Ein-/Ausblenden"></span>GRB</div>
             <div class="metricValue">${fmt(grb_m)} m</div>
           </div>
 
