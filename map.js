@@ -21,7 +21,6 @@ const drawControl = new L.Control.Draw({
     circlemarker: false
   }
 });
-map.addControl(drawControl);
 
 map.addControl(drawControl);
 
@@ -165,6 +164,26 @@ window.overlays = overlays; // expose for UI toggles
 
 // signal that map + overlays are ready
 window.dispatchEvent(new Event('digitool:mapReady'));
+
+// --- Buffer layer registry for toggling from the Results panel ---
+window.BufferLayers = {}; // e.g. { scv: LeafletLayer, grb: LeafletLayer, ... }
+
+window.registerBufferLayer = (key, layer) => {
+  if (!key || !layer) return;
+  window.BufferLayers[key] = layer;
+};
+
+window.toggleBuffer = (key, show = undefined) => {
+  const layer = window.BufferLayers[key];
+  if (!layer || !window._bufferGroup) return;
+  const has = window._bufferGroup.hasLayer(layer);
+  const wantShow = (show === undefined) ? !has : !!show;
+  if (wantShow && !has) layer.addTo(window._bufferGroup);
+  if (!wantShow && has) window._bufferGroup.removeLayer(layer);
+};
+
+window.clearRegisteredBuffers = () => { window.BufferLayers = {}; };
+
 
 // Allow KML import to add features to the drawn items group
 // KML/GeoJSON → Map: put FG into Drawn, others into Buffers (non-editable)

@@ -127,20 +127,31 @@ export function renderDroneInputUI(containerId = 'inputContent') {
 
       const targetGroup = window._bufferGroup || map;
       
-      if (layers.ca)                 L.geoJSON(layers.ca, {                 style: f => f.properties.style }).addTo(targetGroup);
-      if (layers.grb)                L.geoJSON(layers.grb, {                style: f => f.properties.style }).addTo(targetGroup);
-      if (layers.detection_area)     L.geoJSON(layers.detection_area, {     style: f => f.properties.style }).addTo(targetGroup);
-      if (layers.detection_height)   L.geoJSON(layers.detection_height, {   style: f => f.properties.style }).addTo(targetGroup);
-      if (layers.adjacent_area)      L.geoJSON(layers.adjacent_area, {      style: f => f.properties.style }).addTo(targetGroup);
-      if (layers.assemblies_horizon) L.geoJSON(layers.assemblies_horizon, { style: f => f.properties.style }).addTo(targetGroup);
+      window.clearRegisteredBuffers?.(); // NEW: reset the registry before adding
 
+      const makeLayer = (gj) => gj ? L.geoJSON(gj, { style: f => f.properties.style }) : null;
+      const add = (key, gj) => {
+        const ly = makeLayer(gj);
+        if (!ly) return null;
+        window.registerBufferLayer?.(key, ly);
+        ly.addTo(targetGroup);
+        return ly;
+      };
+
+      // Keep stable keys in sync with the Results chips below
+      add('scv',                 layers.ca);
+      add('grb',                 layers.grb);
+      add('detection_area',      layers.detection_area);
+      add('detection_height',    layers.detection_height);
+      add('adjacent_area',       layers.adjacent_area);
+      add('assemblies_horizon',  layers.assemblies_horizon);
 
       const panelHtml = `
         <div class="resultsPanel">
           <h4>Berechnete Puffer</h4>
 
           <div class="metricRow">
-            <div class="metricLabel"><span class="chip chip-scv"></span>Scv</div>
+            <div class="metricLabel"><span class="chip chip-scv" data-key="scv" title="Ein-/Ausblenden">Scv</div>
             <div class="metricValue">${fmt(scv_m)} m</div>
           </div>
 
@@ -151,17 +162,17 @@ export function renderDroneInputUI(containerId = 'inputContent') {
           </div>` : ''}
 
           <div class="metricRow">
-            <div class="metricLabel"><span class="chip chip-grb"></span>GRB</div>
+            <div class="metricLabel"><span class="chip chip-grb" data-key="grb" title="Ein-/Ausblenden">GRB</div>
             <div class="metricValue">${fmt(grb_m)} m</div>
           </div>
 
           <div class="metricRow">
-            <div class="metricLabel"><span class="chip chip-ah"></span>Versammlungen</div>
+            <div class="metricLabel"><span class="chip chip-ah" data-key="assemblies_horizon" title="Ein-/Ausblenden"></span>Sah</div>
             <div class="metricValue">${fmt(ah_m)} m</div>
           </div>
 
           <div class="metricRow">
-            <div class="metricLabel"><span class="chip chip-sd"></span>Detektion</div>
+            <div class="metricLabel"><span class="chip chip-sd" data-key="detection_area" title="Ein-/Ausblenden"></span>Sdeco</div>
             <div class="metricValue">${fmt(sd_m)} m</div>
           </div>
 
@@ -172,7 +183,7 @@ export function renderDroneInputUI(containerId = 'inputContent') {
           </div>` : ''}
 
           <div class="metricRow">
-            <div class="metricLabel"><span class="chip chip-aa"></span>Angrenzend</div>
+            <div class="metricLabel"><span class="chip chip-aa" data-key="adjacent_area" title="Ein-/Ausblenden"></span>Saa</div>
             <div class="metricValue">${fmt(aa_m, 0)} m</div>
           </div>
         </div>
@@ -180,10 +191,31 @@ export function renderDroneInputUI(containerId = 'inputContent') {
 
       el.insertAdjacentHTML('beforeend', panelHtml);
 
-    } catch (e) {
-      console.error(e);
-      alert(`Request failed: ${e.message}`);
-    }
+      
+      const panel = document.getElementById('digitool-results') || el.querySelector('.resultsPanel');
+      panel?.addEventListener('click', (evt) => {
+        const chip = evt.target.closest('.chip');
+        if (!chip) return;
+
+        // Only chips with data-key should toggle (HCV/Hdeco have none)
+        const key = chip.dataset.key;
+        if (!key) return;
+
+        window.toggleBuffer?.(key);
+
+        // Update visual state
+        const layer = window.BufferLayers?.[key];
+        const isShown = layer && window._bufferGroup?.hasLayer(layer);
+        chip.classList.toggle('off', !isShown);
+      });  
+
+    } 
+    
+    catch (e) {
+    console.error(e);
+    alert(`Request failed: ${e.message}`);
+    
+  }
   });
 
   wireKmlUI({ exportScopeSelectId: 'kmlScope' }); // will look for #kmlImportBtn and #kmlExportBtn we added above
@@ -221,10 +253,10 @@ function renderResultsPanelFromKml(results = {}) {
       <div class="metricRow"><div class="metricLabel"><span class="chip chip-scv"></span>Scv</div><div class="metricValue">${fmt(results.scv)} m</div></div>
       ${Number.isFinite(results.hcv) ? `<div class="metricRow"><div class="metricLabel"><span class="chip chip-scv"></span>Hcv</div><div class="metricValue">${fmt(results.hcv)} m</div></div>` : ''}
       <div class="metricRow"><div class="metricLabel"><span class="chip chip-grb"></span>GRB</div><div class="metricValue">${fmt(results.grb)} m</div></div>
-      <div class="metricRow"><div class="metricLabel"><span class="chip chip-ah"></span>Versammlungen</div><div class="metricValue">${fmt(results.ah)} m</div></div>
-      <div class="metricRow"><div class="metricLabel"><span class="chip chip-sd"></span>Detektion</div><div class="metricValue">${fmt(results.decon)} m</div></div>
+      <div class="metricRow"><div class="metricLabel"><span class="chip chip-ah"></span>Sah</div><div class="metricValue">${fmt(results.ah)} m</div></div>
+      <div class="metricRow"><div class="metricLabel"><span class="chip chip-sd"></span>Sdeco</div><div class="metricValue">${fmt(results.decon)} m</div></div>
       ${Number.isFinite(results.hdeco) ? `<div class="metricRow"><div class="metricLabel"><span class="chip chip-hd"></span>Hdeco</div><div class="metricValue">${fmt(results.hdeco)} m</div></div>` : ''}
-      <div class="metricRow"><div class="metricLabel"><span class="chip chip-aa"></span>Angrenzend</div><div class="metricValue">${fmt(results.aa, 0)} m</div></div>
+      <div class="metricRow"><div class="metricLabel"><span class="chip chip-aa"></span>Saa</div><div class="metricValue">${fmt(results.aa, 0)} m</div></div>
     </div>`;
   el.insertAdjacentHTML('beforeend', panelHtml);
 }

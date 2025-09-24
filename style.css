@@ -116,6 +116,9 @@ html, body {
 
 /* Small colored chips to echo layer colors */
 .chip { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px; }
+/* Clickable chips + hidden state */
+.chip { cursor: pointer; border: 1px solid rgba(0,0,0,0.08); }
+.chip.off { opacity: 0.25; outline: 2px dashed rgba(0,0,0,0.15); }
 .chip-scv { background:#DDB027; }
 .chip-grb { background:#DD3927; }
 .chip-sd  { background:#00009B; }
